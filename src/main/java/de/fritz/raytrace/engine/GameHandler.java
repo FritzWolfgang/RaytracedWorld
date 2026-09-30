@@ -1,5 +1,7 @@
 package de.fritz.raytrace.engine;
 
+import de.fritz.raytrace.Statics;
+
 public class GameHandler implements Runnable {
 
     Thread gameThread;
@@ -16,20 +18,35 @@ public class GameHandler implements Runnable {
         gameThread.start();
     }
 
-    int FPS = 60;
 
     @Override
     public void run() {
-        double drawInterval = 1000000000.0 / FPS;
+        double drawInterval = 1000000000.0 / Statics.FPS;
         double nextDrawTime = System.nanoTime() + drawInterval;
+
+        long lastTime = System.nanoTime();
 
         while (gameThread.isAlive()) {
 
-            // UPDATE
+            long currentTime = System.nanoTime();
+            double deltaTime = (currentTime - lastTime) / 1_000_000_000.0;
+            lastTime = currentTime;
+
+            // Avoid a large movement jump after a pause or debugger break.
+            deltaTime = Math.min(deltaTime, 0.1);
+            Time.setDeltaTime(deltaTime);
+
+            //handleMovement
+            canvas.keyHandler.handleKeys();
+
+            //handleMouseMovement
             canvas.update();
+
 
             // DRAW
             canvas.repaint();
+
+
 
             try {
                 double remainingTime = nextDrawTime - System.nanoTime();

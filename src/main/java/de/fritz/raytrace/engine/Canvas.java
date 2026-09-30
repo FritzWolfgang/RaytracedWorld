@@ -6,19 +6,24 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Canvas extends JPanel {
 
-    public static final int CANVAS_WIDTH = 1000,
-                            CANVAS_HEIGHT = 1000;
 
 
-    KeyboardHandler keyHandler = new KeyboardHandler();
 
-    static Viewport viewport;
+    KeyboardHandler keyHandler = new KeyboardHandler(this);
+
+    public static Viewport viewport;
 
     private static Robot robo;
     private static boolean recenteringMouse = false;
+    private static final double MOUSE_SENSITIVITY = 0.1;
+
+    private final AtomicInteger pendingMouseX = new AtomicInteger();
+    private final AtomicInteger pendingMouseY = new AtomicInteger();
 
     static JFrame frame;
     public Canvas(JFrame frame) {
@@ -51,57 +56,46 @@ public class Canvas extends JPanel {
 
     }
 
-    public static void moved(MouseEvent arg0) {
+    private void moved(MouseEvent arg0) {
         if (recenteringMouse) {
-            //prediction
-            int centerX = viewport.canvas.getWidth() / 2;
-            int centerY = viewport.canvas.getHeight() / 2;
-            int moveX = arg0.getX() - centerX;
-            int moveY = arg0.getY() - centerY;
-            viewport.camera.adjustDirection(moveX * 0.1, -moveY * 0.1);
             recenteringMouse = false;
             return;
         }
 
-        int centerX = viewport.canvas.getWidth() / 2;
-        int centerY = viewport.canvas.getHeight() / 2;
-        Point screenPos = viewport.canvas.getLocationOnScreen();
+        int centerX = getWidth() / 2;
+        int centerY = getHeight() / 2;
+        Point screenPos = getLocationOnScreen();
         recenteringMouse = true;
         robo.mouseMove(screenPos.x + centerX, screenPos.y + centerY);
 
         int moveX = arg0.getX() - centerX;
         int moveY = arg0.getY() - centerY;
-        viewport.camera.adjustDirection(moveX * 0.1, -moveY * 0.1);
+        pendingMouseX.addAndGet(moveX);
+        pendingMouseY.addAndGet(moveY);
     }
+
+    void update() {
+        int mouseX = pendingMouseX.getAndSet(0);
+        int mouseY = pendingMouseY.getAndSet(0);
+
+        viewport.camera.adjustDirection(
+                mouseX * MOUSE_SENSITIVITY,
+                -mouseY * MOUSE_SENSITIVITY
+        );
+    }
+
+    BufferedImage img;
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        update();
-        viewport.renderFrame(g2d);
+        img = viewport.renderFrame();
+        g2d.drawImage(img, (getWidth()/2) - img.getWidth()/2, (getHeight()/2) - img.getHeight()/2, null);
     }
 
-    void update(){
-        double yaw = Math.toRadians(viewport.camera.getYaw());
-        double forwardX = Math.sin(yaw);
-        double forwardZ = Math.cos(yaw);
-        double rightX = Math.cos(yaw);
-        double rightZ = -Math.sin(yaw);
 
-        if(keyHandler.isWPressed()){
-            viewport.camera.add(forwardX * 0.1, 0, forwardZ * 0.1);
-        }
-        if(keyHandler.isSPressed()){
-            viewport.camera.add(-forwardX * 0.1, 0, -forwardZ * 0.1);
-        }
-        if(keyHandler.isAPressed()){
-            viewport.camera.add(-rightX * 0.1, 0, -rightZ * 0.1);
-        }
-        if(keyHandler.isDPressed()){
-            viewport.camera.add(rightX * 0.1, 0, rightZ * 0.1);
-        }
-    }
+
 
 
 }

@@ -1,5 +1,8 @@
 package de.fritz.raytrace.math;
 
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+
 public class Vector3 {
 
     double x;
@@ -16,7 +19,7 @@ public class Vector3 {
         return Math.sqrt(Vector3.dotProduct(this,this));
     }
 
-    public Vector3 multiply(double scalar){
+    public Vector3 scale(double scalar){
         return new Vector3(this.x * scalar, this.y * scalar, this.z * scalar);
     }
 
@@ -25,8 +28,12 @@ public class Vector3 {
     }
 
 
+    public Vector3 normalize(){
+        return this.divide(this.computeLength());
+    }
+
     public Vector3 rotateY(double radians, double vDistance) {
-        double cos = Math.cos(radians);
+        double cos = cos(radians);
         double sin = Math.sin(radians);
         double tan = Math.tan(radians);
         return new Vector3(
@@ -56,6 +63,12 @@ public class Vector3 {
     public static Vector3 calculateVec3d(Coord3 coord1, Vector3 vector){
         return new Vector3(coord1.getX() + vector.getX(), coord1.getY() + vector.getY(), coord1.getZ() + vector.getZ());
     }
+
+
+
+
+
+
 
     public double getX() {
         return x;
