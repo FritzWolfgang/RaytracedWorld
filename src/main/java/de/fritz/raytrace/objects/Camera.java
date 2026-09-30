@@ -15,6 +15,12 @@ public class Camera extends Coord3 {
 
     public void adjustDirection(double yaw, double pitch){
         this.yaw += yaw;
+        if(this.pitch+pitch >= 70){
+            this.pitch = 69.9;
+        }
+        if(this.pitch+pitch <= -70){
+            this.pitch = -69.9;
+        }
         this.pitch += pitch;
     }
 
@@ -22,15 +28,8 @@ public class Camera extends Coord3 {
         return yaw;
     }
 
-    public void setYaw(double yaw) {
-        this.yaw = yaw;
-    }
-
     public double getPitch() {
         return pitch;
     }
 
-    public void setPitch(double pitch) {
-        this.pitch = pitch;
-    }
 }

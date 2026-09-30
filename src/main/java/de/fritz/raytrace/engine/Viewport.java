@@ -1,6 +1,6 @@
 package de.fritz.raytrace.engine;
 
-import de.fritz.raytrace.math.Coord2;
+import de.fritz.raytrace.Statics;
 import de.fritz.raytrace.math.Coord3;
 import de.fritz.raytrace.math.Vector3;
 import de.fritz.raytrace.objects.Camera;
@@ -31,14 +31,14 @@ public class Viewport {
    */
 
 
-    Camera camera;
+    public Camera camera;
 
 
 
     double Vwidth = 1.0;
     double Vheight = 1.0;
 
-    double distance = 1.0;
+    double distance = 1.2;
 
     Scene scene = new Scene();
 
@@ -54,21 +54,31 @@ public class Viewport {
     }
 
 
+    BufferedImage img = new BufferedImage(Statics.CANVAS_WIDTH, Statics.CANVAS_HEIGHT, BufferedImage.TYPE_INT_ARGB);
 
-    public void renderFrame(Graphics2D g2d){
-        BufferedImage img = new BufferedImage(Canvas.CANVAS_WIDTH, Canvas.CANVAS_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+    public BufferedImage renderFrame(){
+        double yaw = Math.toRadians(camera.getYaw());
+        double pitch =  Math.toRadians(camera.getPitch());
 
-        for (int y = 0; y < Canvas.CANVAS_HEIGHT; y++) {
-            for (int x = 0; x < Canvas.CANVAS_WIDTH; x++) {
-                Coord2 viewportCoord2 = convertCanvasToViewport(new Coord2(x, y));
+        double pixelScaleX = Vwidth / Statics.CANVAS_WIDTH;
+        double pixelScaleY = Vheight / Statics.CANVAS_HEIGHT;
+        double halfWidth = Statics.CANVAS_WIDTH / 2.0;
+        double halfHeight = Statics.CANVAS_HEIGHT / 2.0;
+
+        for (int y = 0; y < Statics.CANVAS_HEIGHT; y++) {
+            double viewportY = (halfHeight - y) * pixelScaleY;
+
+            for (int x = 0; x < Statics.CANVAS_WIDTH; x++) {
+                double viewportX = (x - halfWidth) * pixelScaleX;
+
                 Coord3 viewportCoord3 = new Coord3(
-                        camera.getX() + viewportCoord2.getX(),
-                        camera.getY() + viewportCoord2.getY(),
+                        camera.getX() + viewportX,
+                        camera.getY() + viewportY,
                         camera.getZ() + distance
                 );
                 Vector3 d = Vector3.calculateVec3d(camera, viewportCoord3).
-                        rotateY(Math.toRadians(camera.getYaw()), distance).
-                        rotateX(Math.toRadians(camera.getPitch()), distance);
+                        rotateY((yaw), distance).
+                        rotateX(pitch, distance);
 
                 Color color = Raytrace.traceRay(d, camera, 1.0, Double.MAX_VALUE, backgroundColor, scene);
 
@@ -76,18 +86,10 @@ public class Viewport {
             }
         }
 
-
-
-        g2d.drawImage(img, (canvas.getWidth()/2) - img.getWidth()/2, (canvas.getHeight()/2) - img.getHeight()/2, null);
+        return img;
     }
 
-    Coord2 convertCanvasToViewport(Coord2 pixelCoord) {
-        double x = pixelCoord.getX();
-        double y  = pixelCoord.getY();
-        double vx = (x - Canvas.CANVAS_WIDTH / 2.0) * (Vwidth / Canvas.CANVAS_WIDTH);
-        double vy = (Canvas.CANVAS_HEIGHT / 2.0 - y) * (Vheight / Canvas.CANVAS_HEIGHT);
-        return new Coord2(vx, vy);
-    }
+
 
 
 

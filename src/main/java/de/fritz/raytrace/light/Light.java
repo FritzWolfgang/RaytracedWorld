@@ -1,6 +1,8 @@
 package de.fritz.raytrace.light;
 
-public abstract class Light {
+import de.fritz.raytrace.objects.Scene;
+
+public abstract class Light{
 
     public static final int AMBIENT = 0;
     public static final int POINT = 1;
@@ -9,9 +11,10 @@ public abstract class Light {
     int type;
     double intensity;
 
-    public Light(int type,  double intensity) {
+    public Light(Scene scene, int type, double intensity) {
         this.type = type;
         this.intensity = intensity;
+        scene.addLight(this);
     }
 
     public int getType() {
