@@ -32,10 +32,51 @@ public class Vector3 {
         return this.divide(this.computeLength());
     }
 
+    public static Vector3 getRotateX(Vector3 m, double radians){
+        double x = m.getX();
+        double y = m.getY()*cos(radians)+m.getZ()*sin(radians);
+        double z = m.getZ()*cos(radians)-m.getY()*sin(radians);
+        return new Vector3(x,y,z);
+    }
+
+    public void rotateX(double radians){
+        this.y = this.y*cos(radians)+this.z*sin(radians);
+        this.z = this.z*cos(radians)-this.y*sin(radians);
+    }
+
+    public static Vector3 getRotateY(Vector3 m, double radians){
+        double x = m.getX()*cos(radians)+m.getZ()*sin(radians);
+        double y = m.getY();
+        double z = m.getZ()*cos(radians)-m.getX()*sin(radians);
+        return new Vector3(x,y,z);
+    }
+
+    public void rotateY(double radians){
+        this.x = this.x*cos(radians)+this.z*sin(radians);
+        this.z = this.z*cos(radians)-this.x*sin(radians);
+    }
+
+    public static Vector3 getRotateZ(Vector3 m, double radians){
+        double x = m.getX()*cos(radians)+m.getY()*sin(radians);
+        double y = m.getY()*cos(radians)-m.getX()*sin(radians);
+        double z = m.getZ();
+        return new Vector3(x,y,z);
+    }
+
+    public void rotateZ(double radians){
+        this.x = this.x*cos(radians)+this.y*sin(radians);
+        this.y = this.y*cos(radians)-this.x*sin(radians);
+    }
+
+    public void rotate(double xRad, double yRad, double zRad){
+        rotateX(xRad);
+        rotateY(yRad);
+        rotateZ(zRad);
+    }
+
     public Vector3 rotateY(double radians, double vDistance) {
         double cos = cos(radians);
         double sin = Math.sin(radians);
-        double tan = Math.tan(radians);
         return new Vector3(
                 this.x * cos + this.z * sin,
                 this.y,

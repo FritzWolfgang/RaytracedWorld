@@ -42,6 +42,8 @@ public class GameHandler implements Runnable {
             //handleMouseMovement
             canvas.update();
 
+            //getFrameImage
+            canvas.updateFrame();
 
             // DRAW
             canvas.repaint();

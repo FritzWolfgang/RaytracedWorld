@@ -85,12 +85,19 @@ public class Canvas extends JPanel {
     }
 
     BufferedImage img;
+    boolean updatingFrame = false;
+
+    public void updateFrame(){
+        if(updatingFrame) return;
+        updatingFrame = true;
+        img = viewport.renderFrame();
+        updatingFrame = false;
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
-        img = viewport.renderFrame();
         g2d.drawImage(img, (getWidth()/2) - img.getWidth()/2, (getHeight()/2) - img.getHeight()/2, null);
     }
 

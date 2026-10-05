@@ -55,6 +55,7 @@ public class Viewport {
 
 
     BufferedImage img = new BufferedImage(Statics.CANVAS_WIDTH, Statics.CANVAS_HEIGHT, BufferedImage.TYPE_INT_ARGB);
+    private final int[] pixels = new int[Statics.CANVAS_WIDTH * Statics.CANVAS_HEIGHT];
 
     public BufferedImage renderFrame(){
         double yaw = Math.toRadians(camera.getYaw());
@@ -82,10 +83,11 @@ public class Viewport {
 
                 Color color = Raytrace.traceRay(d, camera, 1.0, Double.MAX_VALUE, backgroundColor, scene);
 
-                img.setRGB(x, y, color.getRGB());
+                pixels[y * Statics.CANVAS_WIDTH + x] = color.getRGB();
             }
         }
 
+        img.setRGB(0, 0, Statics.CANVAS_WIDTH, Statics.CANVAS_HEIGHT, pixels, 0, Statics.CANVAS_WIDTH);
         return img;
     }
 

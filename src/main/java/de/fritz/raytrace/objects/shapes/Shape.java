@@ -23,6 +23,10 @@ public abstract class Shape {
 
     public abstract Vector3 getLightingNormal(Coord3 p);
 
+    public Vector3 getLightingNormal(Coord3 p, Vector3 rayDirection) {
+        return getLightingNormal(p);
+    }
+
     public void setColor(Color color) {
         this.color = color;
     }

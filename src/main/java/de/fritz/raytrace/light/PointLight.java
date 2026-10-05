@@ -19,13 +19,11 @@ public class PointLight extends Light{
         this.position = position;
         this.scene = scene;
         updateSphere();
-        scene.addShape(sphere);
     }
 
     void updateSphere(){
         scene.removeShape(sphere);
         sphere=new Sphere(scene, position, intensity*0.5, ColorUtils.multiplyColors(new Color(255, 232, 173), (float) (intensity*1.5)), true);
-        scene.addShape(sphere);
     }
 
     public Coord3 getPosition() {

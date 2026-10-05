@@ -2,9 +2,7 @@ package de.fritz.raytrace.engine;
 
 import de.fritz.raytrace.Statics;
 import de.fritz.raytrace.light.ColorUtils;
-import de.fritz.raytrace.light.DirectionalLight;
 import de.fritz.raytrace.light.Light;
-import de.fritz.raytrace.light.PointLight;
 import de.fritz.raytrace.math.Coord3;
 import de.fritz.raytrace.math.Vector3;
 import de.fritz.raytrace.objects.shapes.Rectangle;
@@ -93,9 +91,9 @@ public class Raytrace {
         //determine normal vector on Shape for lighting
         Coord3 p = o.add(d.scale(closest_t));
 
-        Vector3 n = closest.getLightingNormal(p);
+        Vector3 n = closest.getLightingNormal(p, d);
 
-        double lighting = computeLighting(p, n, scene);
+        double lighting = Light.computeLighting(p, n, scene);
         return ColorUtils.multiplyColors(closest.getColor(), (float) lighting);
     }
 
@@ -122,12 +120,10 @@ public class Raytrace {
 
     public static double calculateRectRayIntersect(Vector3 d, Coord3 o, Rectangle rect) {
         Coord3[] points = rect.getPoints();
-
         Coord3 p0 = points[0];
-        Vector3 edgeU = Vector3.calculateVec3d(p0, points[2]);
-        Vector3 edgeV = Vector3.calculateVec3d(p0, points[1]);
-
-        Vector3 normal = cross(edgeU, edgeV);
+        Vector3 edgeU = rect.getEdgeU();
+        Vector3 edgeV = rect.getEdgeV();
+        Vector3 normal = rect.getNormal();
 
         double denominator = Vector3.dotProduct(normal, d);
 
@@ -149,51 +145,15 @@ public class Raytrace {
         Vector3 p0ToHit = Vector3.calculateVec3d(p0, hitPoint);
 
         double u = Vector3.dotProduct(p0ToHit, edgeU)
-                / Vector3.dotProduct(edgeU, edgeU);
+                / rect.getEdgeULengthSquared();
 
         double v = Vector3.dotProduct(p0ToHit, edgeV)
-                / Vector3.dotProduct(edgeV, edgeV);
+                / rect.getEdgeVLengthSquared();
 
-        boolean inside =
-                u >= 0 && u <= 1 &&
-                        v >= 0 && v <= 1;
+        boolean inside = u >= 0 && u <= 1 && v >= 0 && v <= 1;
 
         return inside ? t : -1;
     }
 
-    private static Vector3 cross(Vector3 a, Vector3 b) {
-        return new Vector3(
-                a.getY() * b.getZ() - a.getZ() * b.getY(),
-                a.getZ() * b.getX() - a.getX() * b.getZ(),
-                a.getX() * b.getY() - a.getY() * b.getX()
-        );
-    }
-
-    public static double computeLighting(Coord3 point, Vector3 normal, Scene scene) {
-
-        //determine Light value for a point
-        double i = 0.0;
-        for (Light light : scene.getLights()) {
-
-            if (light.getType() == Light.AMBIENT) { //ambient light is always there
-                i += light.getIntensity();
-            } else {
-                Vector3 l; //determine vector from point to light
-                if (light.getType() == Light.POINT) {
-                    PointLight pointLight = (PointLight) light;
-                    l = Vector3.calculateVec3d(point, pointLight.getPosition());
-                } else {
-                    DirectionalLight dLight = (DirectionalLight) light;
-                    l = dLight.getDirection();/*.multiply(-1);*/
-                }
-
-                if (Vector3.dotProduct(l, normal) > 0) { //make sure only fronts are added
-                    //calculate intensity based on angle
-                    i += light.getIntensity() * (Vector3.dotProduct(l, normal) / (normal.computeLength() * l.computeLength()));
-                }
-            }
-        }
-        return i;
-    }
 
 }
